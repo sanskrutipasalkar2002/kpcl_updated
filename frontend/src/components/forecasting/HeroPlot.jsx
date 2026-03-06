@@ -7,28 +7,56 @@ export default function HeroPlot({ category, curatedPlots, openLightbox }) {
   if (!hero) return null;
 
   return (
-    <div
-      className="relative rounded-xl overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition-shadow"
-      onClick={() => openLightbox(hero.url, hero.label)}
-    >
-      <img
-        className="w-full h-auto object-cover"
-        src={hero.url}
-        alt={hero.label}
-        loading="lazy"
-      />
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-5">
-        <div className="text-white font-semibold text-sm">{hero.label}</div>
-        <div className="text-white/70 text-xs mt-1">{hero.description}</div>
-        <div className="text-white/80 text-xs mt-2 flex items-center gap-1 group-hover:text-white transition-colors">
-          <span>Click to expand</span>
+    <div className="chart-card" style={{ marginBottom: "1.5rem" }}>
+      {/* Card header */}
+      <div className="chart-card-header">
+        <div style={{ minWidth: 0 }}>
+          <span className="badge badge-primary" style={{ marginBottom: 5, display: "inline-flex" }}>
+            Hero Analysis
+          </span>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", lineHeight: 1.25 }}>{hero.label}</div>
+          {hero.description && (
+            <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 3 }}>{hero.description}</div>
+          )}
+        </div>
+        <button
+          onClick={() => openLightbox(hero.url, hero.label)}
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            fontSize: 11.5, fontWeight: 600, color: "#1a7a6d",
+            background: "#e8f5f3", border: "1px solid #a8d5ce",
+            borderRadius: 8, padding: "5px 12px", cursor: "pointer", flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = "#d4eeea"}
+          onMouseLeave={e => e.currentTarget.style.background = "#e8f5f3"}
+        >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <polyline points="15 3 21 3 21 9" />
             <polyline points="9 21 3 21 3 15" />
             <line x1="21" y1="3" x2="14" y2="10" />
             <line x1="3" y1="21" x2="10" y2="14" />
           </svg>
-        </div>
+          Expand
+        </button>
+      </div>
+
+      {/* Image */}
+      <div
+        style={{ cursor: "pointer", overflow: "hidden" }}
+        onClick={() => openLightbox(hero.url, hero.label)}
+      >
+        <img
+          src={hero.url}
+          alt={hero.label}
+          loading="lazy"
+          style={{
+            width: "100%", height: "auto", display: "block",
+            transition: "transform 0.25s ease",
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+        />
       </div>
     </div>
   );

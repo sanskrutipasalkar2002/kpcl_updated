@@ -1,16 +1,44 @@
-import React from "react";
+import React, { useContext } from "react";
+import { FiscalYearContext } from "../../context/FiscalYearContext";
 
-export default function DashboardHeader({ title, subtitle }) {
+export default function DashboardHeader({ title, subtitle, badge }) {
+  const { selectedFy } = useContext(FiscalYearContext) || {};
+
   return (
-    <div className="dashboard-header">
-      <div className="relative z-10">
-        <div className="subtle-badge mb-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary-teal)]" />
-          Dashboard
+    <div className="page-header">
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {/* Pill badges row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)",
+            borderRadius: 20, padding: "3px 11px",
+            fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.88)",
+            letterSpacing: 1.3, textTransform: "uppercase",
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#5eead4", display: "inline-block" }} />
+            {badge || "Dashboard"}
+          </span>
+          {selectedFy && (
+            <span style={{
+              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 20, padding: "3px 10px",
+              fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: 1,
+            }}>{selectedFy}</span>
+          )}
         </div>
-        <h1 className="text-[34px] font-extrabold text-white tracking-tight leading-tight">{title}</h1>
+
+        {/* Title */}
+        <h1 style={{
+          fontSize: "clamp(1.5rem, 3vw, 2rem)",
+          fontWeight: 900, color: "#ffffff",
+          lineHeight: 1.15, letterSpacing: -0.5,
+          marginBottom: subtitle ? 6 : 0,
+        }}>{title}</h1>
+
+        {/* Subtitle */}
         {subtitle && (
-          <p className="text-sm text-white/85 mt-2 font-medium tracking-wide">
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.68)", fontWeight: 400, lineHeight: 1.5 }}>
             {subtitle}
           </p>
         )}

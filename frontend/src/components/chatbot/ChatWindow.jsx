@@ -1,210 +1,255 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Power, X } from "lucide-react";
+import { Send, RotateCcw, X, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Plot from "react-plotly.js";
 import { sendMessage as sendChatMessage } from "../../services/chatApi";
 
-const getCurrentTime = () =>
-  new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+const time = () => new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+const clean = (t) => (t ? t.replace(/\\n/g, "\n") : "");
 
-const INITIAL_MESSAGE = {
+const SUGGESTIONS = [
+  "Plot top 10 dealers by complaint count",
+  "Show complaints trend by year as a line chart",
+  "How many unique compressor models do we have?",
+  "Which dealer has the highest complaints?",
+  "How many complaints mention 'leak' or 'vibration'?",
+  "Most frequently replaced spare part?",
+];
+
+const INIT = {
   role: "bot",
-  text: "Welcome to Kirloskar Pneumatic Company Limited! How can I assist you today?\n\nPlease choose from the following options or type your own question:",
-  options: [
-    "Plot a horizontal bar chart of the top 10 'Dealer Name' by average 'RunHrs'",
-    "Plot a line chart showing the total number of complaints logged per year",
-    "How many unique Compressor 'Model' types do we have?",
-    "Which 'Dealer Name' has the highest number of logged complaints?",
-    "How many rows mention the word 'leak' or 'vibration' in the 'Nature of complaint' column?",
-    "What is the most frequently mentioned item in the 'Spares / Part Replaced' column?",
-  ],
-  time: getCurrentTime(),
+  text: "Hello! I'm **KBot**, your KPCL Warranty Intelligence assistant.\n\nI can analyse warranty data, calculate metrics, generate charts and troubleshoot problems. Try one of the suggestions below, or ask your own question.",
+  options: SUGGESTIONS,
+  time: time(),
 };
 
-const cleanText = (text) => (text ? text.replace(/\\n/g, "\n") : "");
-
 export default function ChatWindow({ onClose }) {
-  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const chatEndRef = useRef(null);
+  const [messages, setMessages] = useState([INIT]);
+  const [input, setInput]       = useState("");
+  const [loading, setLoading]   = useState(false);
+  const endRef = useRef(null);
+  const inputRef = useRef(null);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
-  const handleClearChat = () => {
-    if (window.confirm("Are you sure you want to clear the chat history?")) {
-      setMessages([{ ...INITIAL_MESSAGE, time: getCurrentTime() }]);
+  const handleClear = () => {
+    if (window.confirm("Clear chat history?")) {
+      setMessages([{ ...INIT, time: time() }]);
       setInput("");
     }
   };
 
-  const handleSend = async (overrideText = null) => {
-    const textToSend = typeof overrideText === "string" ? overrideText : input;
-    if (!textToSend.trim()) return;
-
-    setMessages((prev) => [...prev, { role: "user", text: textToSend, time: getCurrentTime() }]);
-    if (typeof overrideText !== "string") setInput("");
-    setIsLoading(true);
-
+  const send = async (text) => {
+    const msg = typeof text === "string" ? text : input;
+    if (!msg.trim()) return;
+    setMessages(p => [...p, { role:"user", text:msg, time:time() }]);
+    if (typeof text !== "string") setInput("");
+    setLoading(true);
     try {
-      const data = await sendChatMessage(textToSend);
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: data.answer, graph_json: data.graph_json, time: getCurrentTime() },
-      ]);
-    } catch (err) {
-      console.error("Chat error:", err);
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: "Connection to backend failed. Please try again later.", time: getCurrentTime() },
-      ]);
+      const data = await sendChatMessage(msg);
+      setMessages(p => [...p, { role:"bot", text:data.answer, graph_json:data.graph_json, time:time() }]);
+    } catch {
+      setMessages(p => [...p, { role:"bot", text:"Connection failed. Please check the backend is running.", time:time() }]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
   return (
-    <div className="fixed bottom-24 right-6 z-[9999] w-[460px] h-[640px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-[var(--border-color)] animate-[fadeIn_0.2s_ease-out]">
-      {/* Header */}
-      <div className="bg-[var(--primary-teal)] text-white px-5 py-4 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
-            <span className="text-[var(--primary-teal)] font-bold text-sm">K</span>
+    <div style={{
+      position: "fixed", bottom: "6rem", right: "1.5rem", zIndex: 9999,
+      width: 460, height: 640,
+      display: "flex", flexDirection: "column",
+      background: "#fff", borderRadius: 20,
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.1)",
+      overflow: "hidden",
+      animation: "fadeInUp 0.25s ease both",
+    }}>
+
+      {/* ── HEADER ── */}
+      <div style={{
+        background: "linear-gradient(135deg, #0d4a42 0%, #155f55 50%, #1a7a6d 100%)",
+        padding: "0.9rem 1.1rem",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexShrink: 0,
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Avatar */}
+          <div style={{
+            width: 38, height: 38, borderRadius: "50%",
+            background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.3)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Sparkles size={16} color="#5eead4" />
           </div>
-          <h3 className="font-semibold text-[19px]">KBot</h3>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#fff", lineHeight: 1.1 }}>KBot</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5eead4" }} />
+              <span style={{ fontSize: 10.5, color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>
+                {loading ? "Thinking…" : "Online"}
+              </span>
+            </div>
+          </div>
         </div>
-        <button onClick={onClose} className="hover:bg-white/20 rounded-full p-1 transition-colors">
-          <X size={20} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button onClick={handleClear} title="Clear chat" style={{
+            background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8,
+            padding: "5px 7px", cursor: "pointer", color: "rgba(255,255,255,0.7)",
+            display: "flex", alignItems: "center",
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+          ><RotateCcw size={14} /></button>
+          <button onClick={onClose} title="Close" style={{
+            background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8,
+            padding: "5px 7px", cursor: "pointer", color: "rgba(255,255,255,0.7)",
+            display: "flex", alignItems: "center",
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+          ><X size={15} /></button>
+        </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-5 bg-[#fdfdfd] flex flex-col gap-5">
+      {/* ── MESSAGES ── */}
+      <div style={{
+        flex: 1, overflowY: "auto", padding: "1rem",
+        display: "flex", flexDirection: "column", gap: "1rem",
+        background: "#f8fafc",
+      }}>
         {messages.map((msg, i) => (
-          <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-            <span className={`text-[11px] text-gray-500 mb-1.5 ${msg.role === "user" ? "mr-1" : "ml-1"}`}>
+          <div key={i} style={{ display:"flex", flexDirection:"column", alignItems: msg.role==="user" ? "flex-end" : "flex-start" }}>
+            {/* Sender label */}
+            <span style={{
+              fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8,
+              color: "#94a3b8", marginBottom: 4,
+              [msg.role === "user" ? "marginRight" : "marginLeft"]: 4,
+            }}>
               {msg.role === "user" ? "You" : "KBot"}
             </span>
-            <div
-              className={`p-4 text-[13px] leading-relaxed shadow-sm ${
-                msg.graph_json ? "max-w-[95%] w-full" : "max-w-[85%]"
-              } ${
-                msg.role === "user"
-                  ? "bg-[var(--primary-teal-light)] text-gray-800 rounded-2xl rounded-tr-sm"
-                  : "bg-[#f4f6f8] text-gray-800 rounded-2xl rounded-tl-sm border border-gray-200"
-              }`}
-            >
+
+            {/* Bubble */}
+            <div className={msg.role === "user" ? "chat-msg-user" : "chat-msg-bot"}>
               {msg.role === "user" ? (
-                <div style={{ whiteSpace: "pre-wrap" }}>{cleanText(msg.text)}</div>
+                <span style={{ whiteSpace: "pre-wrap" }}>{clean(msg.text)}</span>
               ) : (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    p: ({ children }) => <p style={{ marginBottom: "8px", whiteSpace: "pre-wrap" }}>{children}</p>,
-                    ul: ({ children }) => <ul style={{ listStyleType: "disc", paddingLeft: "20px", marginBottom: "8px" }}>{children}</ul>,
-                    ol: ({ children }) => <ol style={{ listStyleType: "decimal", paddingLeft: "20px", marginBottom: "8px" }}>{children}</ol>,
-                    li: ({ children }) => <li style={{ marginBottom: "4px" }}>{children}</li>,
-                    strong: ({ children }) => <strong style={{ fontWeight: "bold", color: "#111827" }}>{children}</strong>,
+                    p: ({children}) => <p style={{ marginBottom:7, whiteSpace:"pre-wrap" }}>{children}</p>,
+                    ul: ({children}) => <ul style={{ paddingLeft:18, marginBottom:7 }}>{children}</ul>,
+                    ol: ({children}) => <ol style={{ paddingLeft:18, marginBottom:7 }}>{children}</ol>,
+                    li: ({children}) => <li style={{ marginBottom:3 }}>{children}</li>,
+                    strong: ({children}) => <strong style={{ fontWeight:700, color:"#0f172a" }}>{children}</strong>,
+                    code: ({children}) => <code style={{ background:"#e8f5f3", color:"#155f55", padding:"1px 5px", borderRadius:4, fontSize:12 }}>{children}</code>,
                   }}
-                >
-                  {cleanText(msg.text)}
-                </ReactMarkdown>
+                >{clean(msg.text)}</ReactMarkdown>
               )}
 
+              {/* Quick options */}
               {msg.options && (
-                <div className="flex flex-wrap gap-2 mt-3.5">
-                  {msg.options.map((opt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSend(opt)}
-                      disabled={isLoading}
-                      className="px-3.5 py-2 text-[11px] font-medium border border-[var(--primary-teal)] text-[var(--primary-teal)] bg-white rounded-full hover:bg-[var(--primary-teal-light)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                    >
-                      {opt}
-                    </button>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginTop:10 }}>
+                  {msg.options.map((opt, j) => (
+                    <button key={j} onClick={() => send(opt)} disabled={loading}
+                      style={{
+                        padding:"4px 10px", fontSize:11, fontWeight:600,
+                        border:"1px solid #a8d5ce", background:"#fff", color:"#155f55",
+                        borderRadius:20, cursor:"pointer", textAlign:"left",
+                        transition:"all 0.15s", opacity: loading ? 0.5 : 1,
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background="#e8f5f3"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background="#fff"; }}
+                    >{opt}</button>
                   ))}
                 </div>
               )}
 
+              {/* Inline chart */}
               {msg.graph_json && (() => {
                 try {
-                  const parsed = JSON.parse(msg.graph_json);
+                  const p = JSON.parse(msg.graph_json);
                   return (
-                    <div className="mt-3.5 rounded-lg border border-gray-200 overflow-hidden bg-white p-2">
+                    <div style={{ marginTop:10, borderRadius:10, border:"1px solid #e2e8f0", overflow:"hidden", background:"#fff" }}>
                       <Plot
-                        data={parsed.data}
-                        layout={{
-                          ...parsed.layout,
-                          autosize: true,
-                          margin: { t: 40, r: 20, l: 55, b: 90 },
-                          paper_bgcolor: "transparent",
-                          plot_bgcolor: "transparent",
-                          font: { family: "Inter, sans-serif", color: "#475569", size: 10 },
-                          legend: { orientation: "h", y: -0.4, x: 0 },
-                        }}
+                        data={p.data}
+                        layout={{ ...p.layout, autosize:true, margin:{t:36,r:16,l:50,b:80},
+                          paper_bgcolor:"transparent", plot_bgcolor:"transparent",
+                          font:{family:"Inter,sans-serif",color:"#475569",size:10},
+                          legend:{orientation:"h",y:-0.4,x:0} }}
                         useResizeHandler
-                        style={{ width: "100%", height: "340px" }}
-                        config={{ responsive: true, displayModeBar: false }}
+                        style={{ width:"100%", height:300 }}
+                        config={{ responsive:true, displayModeBar:false }}
                       />
                     </div>
                   );
-                } catch {
-                  return null;
-                }
+                } catch { return null; }
               })()}
 
-              <span className="text-[10px] text-gray-400 block text-right mt-1.5">{msg.time}</span>
+              {/* Timestamp */}
+              <span style={{ fontSize:9.5, color:"#94a3b8", display:"block", textAlign:"right", marginTop:6 }}>{msg.time}</span>
             </div>
           </div>
         ))}
 
-        {isLoading && (
-          <div className="flex flex-col items-start">
-            <span className="text-[10px] text-gray-500 mb-1 ml-1">KBot</span>
-            <div className="bg-[#f4f6f8] text-gray-500 p-3.5 rounded-2xl rounded-tl-sm border border-gray-100">
-              <div className="flex gap-1.5 items-center h-4">
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
+        {/* Loading dots */}
+        {loading && (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-start" }}>
+            <span style={{ fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:0.8, marginBottom:4, marginLeft:4 }}>KBot</span>
+            <div style={{ background:"#f1f5f9", border:"1px solid #e2e8f0", borderRadius:"4px 14px 14px 14px", padding:"10px 14px", display:"flex", gap:5, alignItems:"center" }}>
+              {[0,150,300].map(d => (
+                <div key={d} style={{ width:7, height:7, borderRadius:"50%", background:"#94a3b8", animation:"bounce 1s infinite", animationDelay:`${d}ms` }} />
+              ))}
             </div>
           </div>
         )}
-        <div ref={chatEndRef} />
+        <div ref={endRef} />
       </div>
 
-      {/* Input */}
-      <div className="bg-white border-t border-gray-100 shrink-0">
-        <div className="flex justify-end px-4 pt-2.5 gap-2 text-gray-400">
-          <Power
-            size={17}
-            onClick={handleClearChat}
-            title="Restart Session"
-            className="cursor-pointer text-orange-400 hover:text-red-500 transition-colors"
-          />
-        </div>
-        <div className="px-4 pb-4 pt-1 flex items-center gap-2.5">
+      {/* ── INPUT ── */}
+      <div style={{ background:"#fff", borderTop:"1px solid #e2e8f0", padding:"0.75rem 1rem", flexShrink:0 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8,
+          background:"#f8fafc", border:"1.5px solid #e2e8f0", borderRadius:12, padding:"0.45rem 0.45rem 0.45rem 0.85rem",
+          transition:"border-color 0.2s",
+        }}
+          onFocusCapture={e => e.currentTarget.style.borderColor="#1a7a6d"}
+          onBlurCapture={e => e.currentTarget.style.borderColor="#e2e8f0"}
+        >
           <input
+            ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 text-[14px] outline-none text-gray-700 placeholder-gray-400 bg-transparent py-2.5"
-            placeholder="Type your question..."
-            disabled={isLoading}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key==="Enter" && !e.shiftKey && send()}
+            placeholder="Ask about warranty data..."
+            disabled={loading}
+            style={{ flex:1, fontSize:13.5, color:"#0f172a", background:"transparent", border:"none", outline:"none" }}
           />
-          <button
-            onClick={() => handleSend()}
-            disabled={isLoading || !input.trim()}
-            className="p-2.5 text-[var(--primary-teal)] hover:bg-teal-50 rounded-full transition-colors disabled:opacity-50"
-          >
-            <Send size={19} />
-          </button>
+          <button onClick={() => send()} disabled={loading || !input.trim()}
+            style={{
+              width:34, height:34, borderRadius:9, border:"none", cursor:"pointer",
+              background: input.trim() && !loading ? "linear-gradient(135deg,#155f55,#1a7a6d)" : "#e2e8f0",
+              color: input.trim() && !loading ? "#fff" : "#94a3b8",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              transition:"all 0.2s", flexShrink:0,
+            }}
+          ><Send size={14} /></button>
         </div>
+        <p style={{ fontSize:10, color:"#94a3b8", textAlign:"center", marginTop:6 }}>
+          Powered by Google Gemini · KPCL Warranty Data
+        </p>
       </div>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+      `}</style>
     </div>
   );
 }

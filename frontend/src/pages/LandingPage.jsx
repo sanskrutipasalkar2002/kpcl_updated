@@ -136,135 +136,152 @@ export default function LandingPage() {
         ref={heroRef}
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #0d4a42 0%, #155f55 40%, #1a7a6d 70%, #1b8a7a 100%)",
-          backgroundSize: "200% 200%",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           textAlign: "center", padding: "6rem 2rem 5rem",
           position: "relative", overflow: "hidden",
         }}
       >
-        {/* Background pattern */}
+        {/* Background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover",
+            zIndex: 0,
+          }}
+        >
+          <source src="/Landing pg video_1 (1).mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark teal gradient overlay — keeps text readable */}
         <div style={{
-          position: "absolute", inset: 0, opacity: 0.07,
+          position: "absolute", inset: 0, zIndex: 1,
+          background: "linear-gradient(135deg, rgba(13,74,66,0.82) 0%, rgba(21,95,85,0.78) 40%, rgba(26,122,109,0.72) 70%, rgba(27,138,122,0.75) 100%)",
+        }} />
+
+        {/* Subtle pattern on top of overlay */}
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 2, opacity: 0.05,
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
         {/* Glow orbs */}
-        <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "rgba(255,255,255,0.04)", top: "10%", right: "-10%", filter: "blur(60px)" }} />
-        <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "rgba(224,124,58,0.08)", bottom: "5%", left: "-5%", filter: "blur(60px)" }} />
+        <div style={{ position: "absolute", zIndex: 2, width: 500, height: 500, borderRadius: "50%", background: "rgba(255,255,255,0.03)", top: "10%", right: "-10%", filter: "blur(60px)" }} />
+        <div style={{ position: "absolute", zIndex: 2, width: 400, height: 400, borderRadius: "50%", background: "rgba(224,124,58,0.06)", bottom: "5%", left: "-5%", filter: "blur(60px)" }} />
 
-        {/* Badge */}
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 8,
-          background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
-          borderRadius: 100, padding: "0.35rem 1rem", marginBottom: "1.75rem",
-          fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.9)",
-          letterSpacing: 1.2, textTransform: "uppercase",
-          backdropFilter: "blur(8px)",
-        }}>
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#5eead4", display: "inline-block", animation: "pulse 2s infinite" }} />
-          Warranty Intelligence Platform
-        </div>
+        {/* All hero content sits above video + overlays */}
+        <div style={{ position: "relative", zIndex: 3, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
 
-        {/* Headline */}
-        <h1 style={{
-          fontSize: "clamp(2.2rem, 5vw, 3.8rem)",
-          fontWeight: 900, color: "#ffffff",
-          lineHeight: 1.12, marginBottom: "1.25rem",
-          maxWidth: 820, letterSpacing: -1,
-        }}>
-          Transform Warranty Data
-          <br />
-          <span style={{ color: "#5eead4" }}>Into Actionable Intelligence</span>
-        </h1>
-
-        <p style={{
-          fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
-          color: "rgba(255,255,255,0.72)", maxWidth: 620,
-          lineHeight: 1.7, marginBottom: "2.5rem", fontWeight: 400,
-        }}>
-          A unified platform combining real-time analytics dashboards, AI-powered chatbot diagnostics,
-          and ML-based forecasting — built specifically for KPCL warranty claims management.
-        </p>
-
-        {/* CTAs */}
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-          <button
-            onClick={() => navigate("/login")}
-            style={{
-              background: "#fff", color: "#155f55", border: "none",
-              borderRadius: 12, padding: "0.85rem 2.25rem",
-              fontSize: 15, fontWeight: 800, cursor: "pointer",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
-              transition: "all 0.25s",
-              display: "flex", alignItems: "center", gap: 8,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 40px rgba(0,0,0,0.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.2)"; }}
-          >
-            Get Started
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-          </button>
-          <button
-            onClick={() => document.getElementById("features").scrollIntoView({ behavior: "smooth" })}
-            style={{
-              background: "rgba(255,255,255,0.1)", color: "#fff",
-              border: "1px solid rgba(255,255,255,0.3)",
-              borderRadius: 12, padding: "0.85rem 2rem",
-              fontSize: 15, fontWeight: 600, cursor: "pointer",
-              backdropFilter: "blur(8px)", transition: "all 0.25s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.18)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; }}
-          >
-            Explore Features
-          </button>
-        </div>
-
-        {/* Dashboard preview card */}
-        <div style={{
-          marginTop: "4rem", maxWidth: 780, width: "100%",
-          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: 20, padding: "1.5rem", backdropFilter: "blur(10px)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-        }}>
-          {/* Fake browser bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem" }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f56" }} />
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#27c93f" }} />
-            <div style={{ flex: 1, background: "rgba(255,255,255,0.1)", borderRadius: 6, height: 22, marginLeft: 8, display: "flex", alignItems: "center", paddingLeft: 10 }}>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>localhost:5173/app</span>
-            </div>
+          {/* Badge */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: 100, padding: "0.35rem 1rem", marginBottom: "1.75rem",
+            fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.9)",
+            letterSpacing: 1.2, textTransform: "uppercase",
+            backdropFilter: "blur(8px)",
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#5eead4", display: "inline-block", animation: "pulse 2s infinite" }} />
+            Warranty Intelligence Platform
           </div>
-          {/* Fake dashboard layout */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 10 }}>
-            {["Total Claims", "Open Claims", "ZHC Rate", "YoY Growth"].map((label, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "0.6rem 0.75rem", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>{label}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#5eead4" }}>{["2,847", "412", "6.2%", "+14%"][i]}</div>
+
+          {/* Headline */}
+          <h1 style={{
+            fontSize: "clamp(2.2rem, 5vw, 3.8rem)",
+            fontWeight: 900, color: "#ffffff",
+            lineHeight: 1.12, marginBottom: "1.25rem",
+            maxWidth: 820, letterSpacing: -1,
+          }}>
+            Transform Warranty Data
+            <br />
+            <span style={{ color: "#5eead4" }}>Into Actionable Intelligence</span>
+          </h1>
+
+          <p style={{
+            fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
+            color: "rgba(255,255,255,0.72)", maxWidth: 620,
+            lineHeight: 1.7, marginBottom: "2.5rem", fontWeight: 400,
+          }}>
+            A unified platform combining real-time analytics dashboards, AI-powered chatbot diagnostics,
+            and ML-based forecasting — built specifically for KPCL warranty claims management.
+          </p>
+
+          {/* CTAs */}
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "3.5rem" }}>
+            <button
+              onClick={() => navigate("/login")}
+              style={{
+                background: "#fff", color: "#155f55", border: "none",
+                borderRadius: 12, padding: "0.85rem 2.25rem",
+                fontSize: 15, fontWeight: 800, cursor: "pointer",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+                transition: "all 0.25s",
+                display: "flex", alignItems: "center", gap: 8,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 40px rgba(0,0,0,0.3)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.2)"; }}
+            >
+              Get Started
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </button>
+            <button
+              onClick={() => document.getElementById("features").scrollIntoView({ behavior: "smooth" })}
+              style={{
+                background: "rgba(255,255,255,0.1)", color: "#fff",
+                border: "1px solid rgba(255,255,255,0.3)",
+                borderRadius: 12, padding: "0.85rem 2rem",
+                fontSize: 15, fontWeight: 600, cursor: "pointer",
+                backdropFilter: "blur(8px)", transition: "all 0.25s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.18)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; }}
+            >
+              Explore Features
+            </button>
+          </div>
+
+          {/* Platform preview video card */}
+          <div style={{
+            maxWidth: 820, width: "100%",
+            background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.18)",
+            borderRadius: 20, overflow: "hidden",
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+          }}>
+            {/* Browser chrome bar */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "0.65rem 1rem",
+              background: "rgba(255,255,255,0.06)",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+            }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f56" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#27c93f" }} />
+              <div style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 6, height: 20, marginLeft: 8, display: "flex", alignItems: "center", paddingLeft: 10 }}>
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)" }}>localhost:5173/app — KPCL Warranty Intelligence</span>
               </div>
-            ))}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 8 }}>
-            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, height: 90, display: "flex", alignItems: "flex-end", padding: "0.5rem 0.75rem", gap: 4, border: "1px solid rgba(255,255,255,0.08)" }}>
-              {[45, 62, 38, 70, 55, 80, 65, 90, 72, 60, 85, 58].map((h, i) => (
-                <div key={i} style={{ flex: 1, background: i === 11 ? "#5eead4" : "rgba(94,234,212,0.4)", borderRadius: "3px 3px 0 0", height: `${h}%`, transition: "height 0.3s" }} />
-              ))}
             </div>
-            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, height: 90, padding: "0.6rem 0.75rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Complaint Types</div>
-              {["Oil Leak", "Noise", "Overheat"].map((t, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <div style={{ width: `${[60, 40, 25][i]}%`, height: 6, background: ["#5eead4", "#e07c3a", "#60a5fa"][i], borderRadius: 3 }} />
-                  <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{t}</span>
-                </div>
-              ))}
-            </div>
+            {/* Actual platform demo video */}
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls={false}
+              style={{ width: "100%", display: "block", maxHeight: 440, objectFit: "cover" }}
+            >
+              <source src="/Landing pg video_1 (1).mp4" type="video/mp4" />
+            </video>
           </div>
+
         </div>
 
         {/* Scroll indicator */}
-        <div style={{ position: "absolute", bottom: "2rem", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, opacity: 0.5 }}>
+        <div style={{ position: "absolute", zIndex: 3, bottom: "2rem", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, opacity: 0.5 }}>
           <span style={{ fontSize: 10, color: "#fff", letterSpacing: 2, textTransform: "uppercase" }}>Scroll</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "bounce 1.5s infinite" }}><path d="M12 5v14M5 12l7 7 7-7" /></svg>
         </div>

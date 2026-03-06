@@ -2,26 +2,54 @@ import React from "react";
 
 export default function NarrativeBanner({ icon, headline, bullets }) {
   return (
-    <div className="flex gap-4 items-start bg-[var(--primary-teal-light)] border border-[var(--primary-teal)]/20 rounded-xl p-5 mb-5">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[var(--primary-teal)]/10 flex items-center justify-center text-[var(--primary-teal)]">
+    <div style={{
+      background: "linear-gradient(135deg, #e8f5f3 0%, #d4eeea 100%)",
+      border: "1px solid #b8ddd8",
+      borderLeft: "4px solid #1a7a6d",
+      borderRadius: 12,
+      padding: "1rem 1.25rem",
+      marginBottom: "1.25rem",
+      display: "flex",
+      gap: "0.85rem",
+      alignItems: "flex-start",
+    }}>
+      {/* Icon bubble */}
+      <div style={{
+        width: 36, height: 36, borderRadius: 9,
+        background: "#1a7a6d", color: "#fff",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0, boxShadow: "0 2px 8px rgba(26,122,109,0.3)",
+      }}>
         {icon || (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
           </svg>
         )}
       </div>
-      <div>
-        <div className="text-sm font-bold text-[var(--text-primary)]">
-          {headline || "Loading..."}
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Headline */}
+        <div style={{
+          fontSize: 13.5, fontWeight: 700, color: "#0f172a",
+          lineHeight: 1.4, marginBottom: bullets?.length ? 7 : 0,
+        }}>
+          {headline || "Loading insights…"}
         </div>
-        {bullets && bullets.length > 0 && (
-          <div className="flex flex-col gap-1 mt-2">
+
+        {/* Bullets */}
+        {bullets?.length > 0 && (
+          <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
             {bullets.map((b, i) => (
-              <span key={i} className="text-xs text-[var(--text-secondary)]">
+              <li key={i} style={{ display: "flex", alignItems: "baseline", gap: 7, fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+                <span style={{
+                  width: 5, height: 5, borderRadius: "50%",
+                  background: "#1a7a6d", display: "inline-block",
+                  flexShrink: 0, marginTop: 5,
+                }} />
                 {b}
-              </span>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </div>

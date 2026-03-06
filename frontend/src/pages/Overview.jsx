@@ -6,306 +6,194 @@ import DashboardHeader from "../components/layout/DashboardHeader";
 import KpiCard from "../components/dashboard/KpiCard";
 import ChartContainer from "../components/dashboard/ChartContainer";
 
-const PRIMARY_TEAL = "#21988a";
-const ACCENT_CORAL = "#c37c5c";
-const DARK_TEAL = "#044c44";
-const LIGHT_GRAY = "#bac5c8";
+const T = "#1a7a6d";
+const TD = "#155f55";
+const C = "#e07c3a";
+const GRAY = "#c8d3dc";
+const GRID = "#f1f5f9";
 
-const BASE_LAYOUT = {
-  font: { family: "Inter, sans-serif", size: 12, color: DARK_TEAL },
-  paper_bgcolor: "#ffffff",
-  plot_bgcolor: "#ffffff",
-  margin: { l: 30, r: 30, t: 70, b: 80 },
-  hoverlabel: {
-    bgcolor: DARK_TEAL,
-    font: { size: 12, family: "Inter, sans-serif", color: "#ffffff" },
-  },
+const BASE = {
+  font: { family: "Inter, sans-serif", size: 12, color: "#475569" },
+  paper_bgcolor: "#ffffff", plot_bgcolor: "#ffffff",
+  margin: { l: 40, r: 24, t: 18, b: 60 },
+  hoverlabel: { bgcolor: "#0f172a", font: { size: 12, family: "Inter, sans-serif", color: "#fff" }, bordercolor: "#0f172a" },
 };
+const CFG = { displayModeBar: false, responsive: true };
 
-const PLOT_CONFIG = { displayModeBar: false, responsive: true };
+function safe(v) { return v == null || Number.isNaN(Number(v)) ? 0 : Number(v); }
+function fmt(v)  { return safe(v).toLocaleString("en-IN"); }
 
-function safe(v) {
-  return v == null || Number.isNaN(Number(v)) ? 0 : Number(v);
-}
-function fmt(v) {
-  return safe(v).toLocaleString("en-IN");
-}
+const MONTHS = ["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
 
 export default function Overview() {
   const { selectedFy } = useContext(FiscalYearContext);
-  const [kpis, setKpis] = useState(null);
+  const [kpis, setKpis]     = useState(null);
   const [trends, setTrends] = useState(null);
 
   useEffect(() => {
     if (!selectedFy) return;
     let cancelled = false;
-    Promise.all([getTrends(selectedFy), getKpis(selectedFy)]).then(
-      ([tr, kp]) => {
-        if (cancelled) return;
-        setTrends(tr);
-        setKpis(kp);
-      }
-    );
-    return () => {
-      cancelled = true;
-    };
+    Promise.all([getTrends(selectedFy), getKpis(selectedFy)]).then(([tr, kp]) => {
+      if (cancelled) return;
+      setTrends(tr); setKpis(kp);
+    });
+    return () => { cancelled = true; };
   }, [selectedFy]);
 
   const growth = safe(kpis?.growth);
-  const isUp = growth > 0;
-
-  const MONTH_ORDER = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+  const isUp   = growth > 0;
 
   return (
     <>
-      <DashboardHeader
-        title="Warranty Claims Overview"
-        subtitle="10-Year Historical Analysis with Year-over-Year Trends"
-      />
+      <DashboardHeader title="Warranty Claims Overview" subtitle="Historical trends, fiscal year comparison and model-stage breakdown" badge="Overview" />
 
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <KpiCard
-          label="Total Complaints"
-          value={fmt(kpis?.total_complaints)}
-          variant="primary"
-          subtitle={kpis?.curr_fy}
-        />
-        <KpiCard
-          label="YoY Growth"
-          value={`${Math.abs(growth).toFixed(1)}%`}
-          variant="secondary"
-          subtitle={isUp ? "YoY Increase" : "YoY Decrease"}
-          trend={{ direction: isUp ? "up" : "down", value: `${Math.abs(growth).toFixed(1)}%` }}
-        />
-        <KpiCard
-          label="Open Complaints"
-          value={fmt(kpis?.open_complaints)}
-          variant="warning"
-        />
-        <KpiCard
-          label="Zero Hour Claims"
-          value={fmt(kpis?.zhc_count)}
-          variant="info"
-          subtitle={`Rate: ${safe(kpis?.zhc_rate).toFixed(1)}%`}
-        />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: "Total Complaints", value: fmt(kpis?.total_complaints), variant: "primary", subtitle: kpis?.curr_fy,
+            icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+          { label: "YoY Growth", value: `${Math.abs(growth).toFixed(1)}%`, variant: isUp ? "rose" : "emerald",
+            subtitle: isUp ? "YoY Increase" : "YoY Decrease",
+            trend: { direction: isUp ? "up" : "down", value: `${Math.abs(growth).toFixed(1)}%` },
+            icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> },
+          { label: "Open Complaints", value: fmt(kpis?.open_complaints), variant: "warning",
+            icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> },
+          { label: "Zero Hour Claims", value: fmt(kpis?.zhc_count), variant: "info",
+            subtitle: `Rate: ${safe(kpis?.zhc_rate).toFixed(1)}%`,
+            icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> },
+        ].map((k, i) => (
+          <div key={i} className={`delay-${(i+1)*100}`}>
+            <KpiCard {...k} />
+          </div>
+        ))}
       </div>
 
-      {/* Row 1: YoY Trend (full width) */}
-      <div className="grid grid-cols-1 gap-6 mb-8">
-        <ChartContainer>
+      {/* 10-Year Trend */}
+      <div className="mb-6">
+        <ChartContainer title="10-Year Complaint Trend" subtitle="Total warranty claims filed per fiscal year" badge="Historical">
           {trends && (
             <Plot
-              data={[
-                {
-                  x: (trends.yoy || []).map((d) => d.fy_year),
-                  y: (trends.yoy || []).map((d) => safe(d.count)),
-                  mode: "lines+markers+text",
-                  name: "Complaints",
-                  line: { color: PRIMARY_TEAL, width: 3, shape: "spline" },
-                  marker: { size: 10, color: PRIMARY_TEAL, line: { color: "#ffffff", width: 2 } },
-                  text: (trends.yoy || []).map((d) => safe(d.count)),
-                  textposition: "top center",
-                  textfont: { size: 11, color: DARK_TEAL, family: "Inter, sans-serif" },
-                  fill: "tozeroy",
-                  fillcolor: "rgba(33,152,138,0.1)",
-                  hovertemplate: "<b>FY %{x}</b><br>Complaints: %{y}<extra></extra>",
-                },
-              ]}
+              data={[{
+                x: (trends.yoy || []).map(d => d.fy_year),
+                y: (trends.yoy || []).map(d => safe(d.count)),
+                mode: "lines+markers+text",
+                line: { color: T, width: 3, shape: "spline" },
+                marker: { size: 9, color: T, line: { color: "#fff", width: 2 } },
+                text: (trends.yoy || []).map(d => safe(d.count).toLocaleString("en-IN")),
+                textposition: "top center",
+                textfont: { size: 10.5, color: TD },
+                fill: "tozeroy", fillcolor: "rgba(26,122,109,0.08)",
+                hovertemplate: "<b>FY %{x}</b><br>%{y} complaints<extra></extra>",
+              }]}
               layout={{
-                ...BASE_LAYOUT,
-                title: { text: "10-Year Complaint Trend", font: { size: 16, color: DARK_TEAL, family: "Inter, sans-serif" } },
-                xaxis: { title: "", showgrid: false, linecolor: "#e0e7e8", color: DARK_TEAL },
-                yaxis: { title: "", showticklabels: false, showgrid: false, zeroline: false },
+                ...BASE,
+                height: 320,
+                xaxis: { showgrid: false, linecolor: GRID, zeroline: false, color: "#94a3b8", tickfont: { size: 11 } },
+                yaxis: { showgrid: true, gridcolor: GRID, zeroline: false, showticklabels: false },
                 showlegend: false,
               }}
-              config={PLOT_CONFIG}
-              useResizeHandler
-              style={{ width: "100%", height: "380px" }}
+              config={CFG} useResizeHandler style={{ width: "100%", height: 320 }}
             />
           )}
         </ChartContainer>
       </div>
 
-      {/* Row 2: Monthly + Quarterly */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ChartContainer>
+      {/* Monthly + Quarterly */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <ChartContainer title="Monthly Comparison" subtitle="Current vs previous fiscal year" badge="Monthly">
           {trends && (() => {
-            const all = [...(trends.monthly || [])].sort((a, b) => safe(a.fy_month_idx) - safe(b.fy_month_idx));
-            const currFy = trends.curr_fy;
-            const prevFy = trends.prev_fy;
-            const traces = [];
-
-            if (prevFy) {
-              const prev = all.filter((d) => d.fy_year === prevFy);
-              traces.push({
-                x: prev.map((d) => d.fy_month_name),
-                y: prev.map((d) => safe(d.count)),
-                mode: "lines",
-                name: `FY ${prevFy}`,
-                line: { color: LIGHT_GRAY, width: 2, shape: "spline" },
-                fill: "tozeroy",
-                fillcolor: "rgba(186,197,200,0.2)",
-                hovertemplate: `<b>%{x} - FY ${prevFy}</b><br>Complaints: %{y}<extra></extra>`,
-              });
-            }
-
-            if (currFy) {
-              const curr = all.filter((d) => d.fy_year === currFy);
-              const y = curr.map((d) => safe(d.count));
-              traces.push({
-                x: curr.map((d) => d.fy_month_name),
-                y,
-                mode: "lines+markers+text",
-                name: `FY ${currFy}`,
-                line: { color: PRIMARY_TEAL, width: 3, shape: "spline" },
-                marker: { size: 9, color: PRIMARY_TEAL, line: { color: "#ffffff", width: 2 } },
-                text: y,
-                textposition: "top center",
-                textfont: { size: 10, color: DARK_TEAL },
-                hovertemplate: `<b>%{x} - FY ${currFy}</b><br>Complaints: %{y}<extra></extra>`,
-              });
-            }
-
+            const all   = [...(trends.monthly || [])].sort((a,b) => safe(a.fy_month_idx)-safe(b.fy_month_idx));
+            const curr  = all.filter(d => d.fy_year === trends.curr_fy);
+            const prev  = all.filter(d => d.fy_year === trends.prev_fy);
             return (
               <Plot
-                data={traces}
+                data={[
+                  prev.length ? { x: prev.map(d=>d.fy_month_name), y: prev.map(d=>safe(d.count)), mode:"lines",
+                    name: trends.prev_fy, line:{color:GRAY,width:2,shape:"spline",dash:"dot"},
+                    fill:"tozeroy", fillcolor:"rgba(200,211,220,0.12)",
+                    hovertemplate:`<b>%{x}</b> ${trends.prev_fy}: %{y}<extra></extra>` } : null,
+                  curr.length ? { x: curr.map(d=>d.fy_month_name), y: curr.map(d=>safe(d.count)), mode:"lines+markers",
+                    name: trends.curr_fy, line:{color:T,width:3,shape:"spline"},
+                    marker:{size:7,color:T,line:{color:"#fff",width:2}},
+                    hovertemplate:`<b>%{x}</b> ${trends.curr_fy}: %{y}<extra></extra>` } : null,
+                ].filter(Boolean)}
                 layout={{
-                  ...BASE_LAYOUT,
-                  title: { text: "Monthly Comparison: Current vs Previous FY", font: { size: 16, color: DARK_TEAL, family: "Inter, sans-serif" } },
-                  xaxis: { title: "", categoryorder: "array", categoryarray: MONTH_ORDER, showgrid: false, linecolor: "#e0e7e8", color: DARK_TEAL },
-                  yaxis: { title: "", showticklabels: false, showgrid: false, zeroline: false },
-                  legend: { orientation: "h", yanchor: "top", y: -0.15, xanchor: "center", x: 0.5, bgcolor: "rgba(255,255,255,0)", font: { color: DARK_TEAL, size: 11 } },
+                  ...BASE, height: 300,
+                  xaxis: { categoryorder:"array", categoryarray:MONTHS, showgrid:false, linecolor:GRID, color:"#94a3b8", tickfont:{size:11} },
+                  yaxis: { showgrid:true, gridcolor:GRID, zeroline:false, showticklabels:false },
+                  legend: { orientation:"h", yanchor:"top", y:-0.18, xanchor:"center", x:0.5, font:{size:11,color:"#475569"} },
                 }}
-                config={PLOT_CONFIG}
-                useResizeHandler
-                style={{ width: "100%", height: "380px" }}
+                config={CFG} useResizeHandler style={{ width:"100%", height:300 }}
               />
             );
           })()}
         </ChartContainer>
 
-        <ChartContainer>
+        <ChartContainer title="Quarterly Comparison" subtitle="Q1–Q4 performance vs prior year" badge="Quarterly">
           {trends && (() => {
-            const all = trends.quarterly || [];
-            const quartersOrder = ["Q1", "Q2", "Q3", "Q4"];
-            const currFy = trends.curr_fy;
-            const prevFy = trends.prev_fy;
-            const traces = [];
-
-            if (prevFy) {
-              const prev = all.filter((d) => d.fy_year === prevFy);
-              traces.push({
-                x: prev.map((d) => d.quarter),
-                y: prev.map((d) => safe(d.count)),
-                mode: "lines",
-                name: `FY ${prevFy}`,
-                line: { color: LIGHT_GRAY, width: 2, shape: "spline" },
-                fill: "tozeroy",
-                fillcolor: "rgba(186,197,200,0.2)",
-                hovertemplate: `<b>Q%{x} - FY ${prevFy}</b><br>Complaints: %{y}<extra></extra>`,
-              });
-            }
-
-            if (currFy) {
-              const curr = all.filter((d) => d.fy_year === currFy);
-              const y = curr.map((d) => safe(d.count));
-              traces.push({
-                x: curr.map((d) => d.quarter),
-                y,
-                mode: "lines+markers+text",
-                name: `FY ${currFy}`,
-                line: { color: ACCENT_CORAL, width: 3, shape: "spline" },
-                marker: { size: 10, color: ACCENT_CORAL, line: { color: "#ffffff", width: 2 } },
-                text: y,
-                textposition: "top center",
-                textfont: { size: 10, color: DARK_TEAL },
-                hovertemplate: `<b>Q%{x} - FY ${currFy}</b><br>Complaints: %{y}<extra></extra>`,
-              });
-            }
-
+            const all  = trends.quarterly || [];
+            const curr = all.filter(d => d.fy_year === trends.curr_fy);
+            const prev = all.filter(d => d.fy_year === trends.prev_fy);
             return (
               <Plot
-                data={traces}
+                data={[
+                  prev.length ? { x:prev.map(d=>d.quarter), y:prev.map(d=>safe(d.count)), mode:"lines",
+                    name:trends.prev_fy, line:{color:GRAY,width:2,shape:"spline",dash:"dot"},
+                    fill:"tozeroy", fillcolor:"rgba(200,211,220,0.12)",
+                    hovertemplate:`<b>%{x}</b> ${trends.prev_fy}: %{y}<extra></extra>` } : null,
+                  curr.length ? { x:curr.map(d=>d.quarter), y:curr.map(d=>safe(d.count)), mode:"lines+markers+text",
+                    name:trends.curr_fy, line:{color:C,width:3,shape:"spline"},
+                    marker:{size:10,color:C,line:{color:"#fff",width:2}},
+                    text:curr.map(d=>safe(d.count)), textposition:"top center", textfont:{size:10.5,color:TD},
+                    hovertemplate:`<b>%{x}</b> ${trends.curr_fy}: %{y}<extra></extra>` } : null,
+                ].filter(Boolean)}
                 layout={{
-                  ...BASE_LAYOUT,
-                  title: { text: "Quarterly: Current vs Previous FY", font: { size: 16, color: DARK_TEAL, family: "Inter, sans-serif" } },
-                  xaxis: { title: "", categoryorder: "array", categoryarray: quartersOrder, showgrid: false, linecolor: "#e0e7e8", color: DARK_TEAL },
-                  yaxis: { title: "", showticklabels: false, showgrid: false, zeroline: false },
-                  legend: { orientation: "h", yanchor: "top", y: -0.15, xanchor: "center", x: 0.5, bgcolor: "rgba(255,255,255,0)", font: { color: DARK_TEAL, size: 11 } },
+                  ...BASE, height: 300,
+                  xaxis: { categoryorder:"array", categoryarray:["Q1","Q2","Q3","Q4"], showgrid:false, linecolor:GRID, color:"#94a3b8", tickfont:{size:11} },
+                  yaxis: { showgrid:true, gridcolor:GRID, zeroline:false, showticklabels:false },
+                  legend: { orientation:"h", yanchor:"top", y:-0.18, xanchor:"center", x:0.5, font:{size:11,color:"#475569"} },
                 }}
-                config={PLOT_CONFIG}
-                useResizeHandler
-                style={{ width: "100%", height: "380px" }}
+                config={CFG} useResizeHandler style={{ width:"100%", height:300 }}
               />
             );
           })()}
         </ChartContainer>
       </div>
 
-      {/* Row 3: Single-Stage + Dual-Stage */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ChartContainer>
+      {/* Single + Dual Stage */}
+      <div className="section-label">Model Stage Breakdown</div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <ChartContainer title="Single-Stage Models" subtitle="Top models by complaint volume" badge="Single Stage">
           {trends && (() => {
-            const data = trends.single_stage || [];
+            const data = (trends.single_stage || []);
             return (
               <Plot
-                data={[
-                  {
-                    x: data.map((d) => d.model),
-                    y: data.map((d) => safe(d.count)),
-                    text: data.map((d) => safe(d.count)),
-                    textposition: "outside",
-                    textfont: { size: 11, color: DARK_TEAL },
-                    type: "bar",
-                    marker: { color: PRIMARY_TEAL, line: { color: "#1a7a6e", width: 1.5 } },
-                    hovertemplate: "<b>%{x}</b><br>Complaints: %{y}<extra></extra>",
-                    name: "Single-Stage Models",
-                  },
-                ]}
-                layout={{
-                  ...BASE_LAYOUT,
-                  title: { text: "Single-Stage Models", font: { size: 16, color: DARK_TEAL, family: "Inter, sans-serif" } },
-                  xaxis: { title: "", showgrid: false, linecolor: "#e0e7e8", color: DARK_TEAL },
-                  yaxis: { title: "", showticklabels: false, showgrid: false, zeroline: false },
-                  showlegend: false,
-                }}
-                config={PLOT_CONFIG}
-                useResizeHandler
-                style={{ width: "100%", height: "380px" }}
+                data={[{ x:data.map(d=>d.model), y:data.map(d=>safe(d.count)),
+                  type:"bar", marker:{color:T, opacity:0.85},
+                  text:data.map(d=>safe(d.count)), textposition:"outside", textfont:{size:10.5,color:TD},
+                  hovertemplate:"<b>%{x}</b><br>%{y} complaints<extra></extra>" }]}
+                layout={{ ...BASE, height:300, showlegend:false,
+                  xaxis:{showgrid:false,linecolor:GRID,color:"#94a3b8",tickangle:-30,tickfont:{size:10.5}},
+                  yaxis:{showgrid:true,gridcolor:GRID,zeroline:false,showticklabels:false} }}
+                config={CFG} useResizeHandler style={{ width:"100%", height:300 }}
               />
             );
           })()}
         </ChartContainer>
 
-        <ChartContainer>
+        <ChartContainer title="Dual-Stage Models" subtitle="Top models by complaint volume" badge="Dual Stage" badgeVariant="accent">
           {trends && (() => {
-            const data = trends.dual_stage || [];
+            const data = (trends.dual_stage || []);
             return (
               <Plot
-                data={[
-                  {
-                    x: data.map((d) => d.model),
-                    y: data.map((d) => safe(d.count)),
-                    text: data.map((d) => safe(d.count)),
-                    textposition: "outside",
-                    textfont: { size: 11, color: DARK_TEAL },
-                    type: "bar",
-                    marker: { color: ACCENT_CORAL, line: { color: "#a86849", width: 1.5 } },
-                    hovertemplate: "<b>%{x}</b><br>Complaints: %{y}<extra></extra>",
-                    name: "Dual-Stage Models",
-                  },
-                ]}
-                layout={{
-                  ...BASE_LAYOUT,
-                  title: { text: "Dual-Stage Models", font: { size: 16, color: DARK_TEAL, family: "Inter, sans-serif" } },
-                  xaxis: { title: "", showgrid: false, linecolor: "#e0e7e8", color: DARK_TEAL },
-                  yaxis: { title: "", showticklabels: false, showgrid: false, zeroline: false },
-                  showlegend: false,
-                }}
-                config={PLOT_CONFIG}
-                useResizeHandler
-                style={{ width: "100%", height: "380px" }}
+                data={[{ x:data.map(d=>d.model), y:data.map(d=>safe(d.count)),
+                  type:"bar", marker:{color:C, opacity:0.85},
+                  text:data.map(d=>safe(d.count)), textposition:"outside", textfont:{size:10.5,color:"#8a4a1e"},
+                  hovertemplate:"<b>%{x}</b><br>%{y} complaints<extra></extra>" }]}
+                layout={{ ...BASE, height:300, showlegend:false,
+                  xaxis:{showgrid:false,linecolor:GRID,color:"#94a3b8",tickangle:-30,tickfont:{size:10.5}},
+                  yaxis:{showgrid:true,gridcolor:GRID,zeroline:false,showticklabels:false} }}
+                config={CFG} useResizeHandler style={{ width:"100%", height:300 }}
               />
             );
           })()}
