@@ -1,4 +1,4 @@
 const BASE_API =
-  "https://kpcl-warranty-claims-backend.onrender.com";
+  "https://kpclupdated-production.up.railway.app/";
 
 export const baseUrl = BASE_API.replace(/\/$/, "");
