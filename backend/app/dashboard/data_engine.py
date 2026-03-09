@@ -10,7 +10,7 @@ class WarrantyDataEngine:
         self.load_data()
 
     def load_data(self):
-        base_path = pathlib.Path(__file__).parent.parent.parent
+        base_path = pathlib.Path(__file__).parent.parent.parent.parent
         full_path = base_path / "data" / "dashboard" / self.file_path
 
         print(f"Loading data from: {full_path}")
